@@ -4,7 +4,7 @@
 ![Field](https://img.shields.io/badge/Field-Hematology-red.svg)
 ![Deep Learning](https://img.shields.io/badge/Framework-TensorFlow/Keras-orange.svg)
 
-[cite_start]Official implementation of the research paper: **"Stain-Standardized Deep Learning Framework for Robust Leukocyte Segmentation Across Heterogeneous Cytological Datasets"**[cite: 3].
+Official implementation of the research paper: **"Stain-Standardized Deep Learning Framework for Robust Leukocyte Segmentation Across Heterogeneous Cytological Datasets"**.
 
 ---
 
