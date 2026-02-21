@@ -157,6 +157,6 @@ The following pretrained weights are provided for the stain standardization modu
 
 ### 🧠 Segmentation Module
 
-Pretrained segmentation weights can be downloaded from:
+Pretrained colorization and segmentation weights can be downloaded from:
 
 🔗 https://drive.google.com/drive/folders/1eImjTdsLICvj7OEeZHwxyEicbr6_erbH?usp=sharing
