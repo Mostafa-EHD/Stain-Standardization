@@ -1,67 +1,162 @@
 # Stain-Standardized Deep Learning Framework for Robust Leukocyte Segmentation
 
-![Paper Status](https://img.shields.io/badge/Status-Submitted_to_Information_2026-blue.svg)
-![Field](https://img.shields.io/badge/Field-Hematology-red.svg)
-![Deep Learning](https://img.shields.io/badge/Framework-TensorFlow/Keras-orange.svg)
+![Paper Status](https://img.shields.io/badge/Status-Submitted%20(Information%202026)-2f6fdb.svg)
+![Task](https://img.shields.io/badge/Task-Leukocyte%20Segmentation-8b0000.svg)
+![Framework](https://img.shields.io/badge/Framework-TensorFlow%2FKeras-f39c12.svg)
 
-Official implementation of the research paper: **"Stain-Standardized Deep Learning Framework for Robust Leukocyte Segmentation Across Heterogeneous Cytological Datasets"**.
+Official implementation of the research paper:
 
----
-
-## 📌 Overview
-Accurate leukocyte segmentation is often hindered by staining variability and heterogeneous imaging conditions. This repository provides a **dual-module framework** designed to achieve stain-invariant and robust segmentation by:
-1.  **Stain Standardization**: Harmonizing diverse inputs (MGG, H&E, etc.) toward a **Wright-Giemsa** reference appearance.
-2.  **Multi-Encoder Segmentation**: Integrating spatial, leukocyte-specific, and nucleus-focused representations from multiple color spaces.
-
-
+**"Stain-Standardized Deep Learning Framework for Robust Leukocyte Segmentation Across Heterogeneous Cytological Datasets"**
 
 ---
 
-## 🏗️ Framework Architecture
+## 📌 Important Training Protocol
 
-### 1. Colorization Module (Stain Normalization)
-This module converts inconsistently stained images into a uniform representation.
-* **Encoder**: A fine-tuned **VGG16** backbone (up to `block5_conv3`).
-* **Bottleneck**: A **Transformer** block with **Multi-Head Self-Attention** (4 heads, key dimension 512) to learn long-range contextual dependencies.
-* **Decoder**: A convolutional network that predicts the $(a^*, b^*)$ chrominance channels of the **CIELAB** color space, which are then combined with the original **L (Luminance)** channel.
+Both the **colorization (stain standardization)** and **segmentation** modules are trained **exclusively on the AML-Cytomorphology LMU dataset (Wright–Giemsa staining)**.
 
-### 2. Segmentation Module
-A multi-branch architecture designed to differentiate biologically distinct elements:
-* **RGB Encoder**: Captures global structural context and patterns.
-* **WBC Encoder**: Uses **Cyan, Yellow, $b^*$, Hue, Saturation,** and $v^*$ channels to extract leukocyte features.
-* **Nucleus Encoder**: Utilizes **Magenta, Luminance, $a^*$, Hue,** and **Saturation** to isolate nuclear characteristics.
-* **Refinement**: Includes **Residual Blocks** and integrated thresholding operations (Otsu, Li, Yen, etc.) to enhance robustness against noise.
+The remaining datasets (**LISC, CellaVision, JTSC, ALL-IDB2, BASE CYTO**) are used **strictly for external evaluation**, with:
 
+- No retraining  
+- No fine-tuning  
+- No dataset-specific adaptation  
 
+This design allows direct assessment of **cross-dataset generalization** and **robustness to staining variability**.
+
+---
+
+## 📖 Overview
+
+Accurate leukocyte segmentation is frequently degraded by:
+
+- Staining variability (Wright–Giemsa, MGG, H&E)
+- Differences in magnification and acquisition devices
+- Heterogeneous cell density and background noise
+
+This repository implements a **two-stage deep learning pipeline**:
+
+1. **Stain Standardization Module**  
+   Harmonizes input images toward a Wright–Giemsa reference appearance.
+
+2. **Multi-Encoder Segmentation Module**  
+   Extracts complementary representations across multiple color spaces for robust segmentation.
+
+The goal is simple:
+
+> Train once. Generalize everywhere.
+
+---
+
+## 🏗️ Methodology
+
+### 1️⃣ Colorization Module (Stain Standardization)
+
+This module converts heterogeneous stain appearances into a unified Wright–Giemsa-like representation.
+
+**Architecture:**
+
+- **Encoder:** Fine-tuned VGG16 (up to `block5_conv3`)
+- **Bottleneck:** Transformer block with Multi-Head Self-Attention  
+  - 4 attention heads  
+  - Key dimension: 512
+- **Decoder:** Convolutional decoder predicting the **CIELAB chrominance channels** \((a^\*, b^\*)\)
+
+The predicted chrominance channels are combined with the original **L (luminance)** channel to reconstruct the standardized image.
+
+---
+
+### 2️⃣ Multi-Encoder Segmentation Module
+
+A multi-branch architecture designed to capture biologically meaningful features.
+
+#### 🔹 RGB Encoder
+Captures global morphology, spatial structure, and texture.
+
+#### 🔹 Leukocyte-Focused Encoder
+Uses discriminative channels such as:
+- Cyan
+- Yellow
+- \(b^\*\)
+- Hue
+- Saturation
+- \(v^\*\)
+
+#### 🔹 Nucleus-Focused Encoder
+Emphasizes nuclear structures using:
+- Magenta
+- Luminance
+- \(a^\*\)
+- Hue
+- Saturation
+
+#### 🔹 Refinement
+Includes:
+- Residual blocks
+- Optional threshold-based priors (Otsu, Li, Yen, etc.)
+
+These components increase robustness to noise and domain shift.
 
 ---
 
 ## 📊 Datasets
-The framework is evaluated on **six** public and clinical datasets:
 
-| Dataset | Staining | Magnification | Samples | Usage |
-| :--- | :--- | :--- | :--- | :--- |
-| **AML Cyto. LMU** | Wright-Giemsa | 100x | 18,365 | Reference/Class.  |
-| **ALL-IDB2** | MGG | 300x-500x | 260 | Leukemic vs Normal  |
-| **LISC** | Wright-Giemsa | 100x | 257 | WBC Classification  |
-| **CellaVision** | MGG | 100x | 17,092 | Standardized single cells |
-| **JTSC** | H&E | 20x-100x | 300 | Challenging stain conditions |
-| **BASE CYTO** | MGG | 100x | 87 | Local clinical dataset  |
+| Dataset | Staining | Magnification | Samples | Role |
+|----------|------------|----------------|----------|-------|
+| **AML-Cytomorphology LMU** | Wright–Giemsa | 100× | 18,365 | Training / Validation / Test |
+| **LISC** | Wright–Giemsa | 100× | 257 | External evaluation |
+| **CellaVision** | MGG | 100× | 17,092 | External evaluation |
+| **JTSC** | H&E | 20×–100× | 300 | External evaluation |
+| **ALL-IDB2** | MGG | 300×–500× | 260 | External evaluation |
+| **BASE CYTO** | MGG | 100× | 87 | External evaluation |
 
----
-
-## 📈 Performance & Metrics
-The model is evaluated using the following formal metrics:
-
-* **Accuracy**: $$\frac{TP + TN}{TP + TN + FP + FN}$$ 
-* **Dice Coefficient**: $$\frac{2 \times TP}{2 \times TP + FP + FN}$$ 
-* **Jaccard Index**: $$\frac{TP}{TP + FP + FN}$$ 
-
-**Key Results**:
-* Dice coefficients exceed **96%** on most datasets.
-* Average Dice of **97.53%** on AML LMU and **97.48%** on LISC.
-* Significant performance gains over baseline U-Net through the synergy of stain normalization and multi-encoder fusion.
+Evaluation on the five non-AML datasets is performed using the trained AML model without adaptation.
 
 ---
 
+## 📈 Evaluation Metrics
 
+- **Dice Coefficient**  
+  \[
+  \frac{2TP}{2TP + FP + FN}
+  \]
+
+- **Jaccard Index (IoU)**  
+  \[
+  \frac{TP}{TP + FP + FN}
+  \]
+
+- **Accuracy**  
+  \[
+  \frac{TP + TN}{TP + TN + FP + FN}
+  \]
+
+---
+
+## 📈 Performance Highlights (Dice)
+
+- AML LMU: **97.53%**
+- LISC: **97.48%**
+- CellaVision: **97.47%**
+- JTSC: **97.90%**
+- ALL-IDB2: **98.73%**
+- BASE CYTO: **96.09%**
+
+These results demonstrate strong cross-dataset generalization from a single training dataset.
+
+---
+
+## 📦 Pretrained Weights
+
+### 🎨 Colorization Module
+
+The following pretrained weights are provided for the stain standardization module:
+
+- `colorisation_vgg16_encoder.h5`
+- `colorisation_decoder.h5`
+
+---
+
+### 🧠 Segmentation Module
+
+Pretrained segmentation weights can be downloaded from:
+
+🔗 https://drive.google.com/drive/folders/1eImjTdsLICvj7OEeZHwxyEicbr6_erbH?usp=sharing
