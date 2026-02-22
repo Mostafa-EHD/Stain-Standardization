@@ -10,6 +10,22 @@ Official implementation of the research paper:
 
 ---
 
+## Main Components
+
+- `image_colorization.py`  
+  Core stain standardization module.
+
+- `image_colorization_transformer.py`  
+  Transformer-enhanced colorization architecture.
+
+- `leukocyte_segmentation_module.py`  
+  Multi-encoder segmentation network.
+
+- `inference_stain_standardized_deep_learning_framework_for_robust_leukocyte_segmentation.py`  
+  End-to-end inference pipeline.
+
+---
+
 ## 📌 Important Training Protocol
 
 Both the **colorization (stain standardization)** and **segmentation** modules are trained **exclusively on the AML-Cytomorphology LMU dataset (Wright–Giemsa staining)**.
@@ -115,19 +131,13 @@ Evaluation on the five non-AML datasets is performed using the trained AML model
 ## 📈 Evaluation Metrics
 
 - **Dice Coefficient**  
-  \[
-  \frac{2TP}{2TP + FP + FN}
-  \]
+ 2TP / (2TP + FP + FN)
 
 - **Jaccard Index (IoU)**  
-  \[
-  \frac{TP}{TP + FP + FN}
-  \]
+ TP / (TP + FP + FN)
 
 - **Accuracy**  
-  \[
-  \frac{TP + TN}{TP + TN + FP + FN}
-  \]
+ (TP + TN) / (TP + TN + FP + FN)
 
 ---
 
@@ -144,18 +154,23 @@ These results demonstrate strong cross-dataset generalization from a single trai
 
 ---
 
-## 📦 Pretrained Weights
+## 📦 Inference
+Run the full pipeline:
 
-### 🎨 Colorization Module
-
-The following pretrained weights are provided for the stain standardization module:
-
-- `colorisation_vgg16_encoder.h5`
-- `colorisation_decoder.h5`
+```bash
+python inference_stain_standardized_deep_learning_framework_for_robust_leukocyte_segmentation.py \
+  --input_dir path/to/images \
+  --output_dir path/to/results \
+  --colorization_model path/to/colorization_module.h5 \
+  --segmentation_model path/to/segmentation_module.h5 \
+  --save_overlay
+```
 
 ---
 
-### 🧠 Segmentation Module
+## 📦 Pretrained Weights
+
+### 🎨 Colorization and Segmentation Modules
 
 Pretrained colorization and segmentation weights can be downloaded from:
 
